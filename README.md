@@ -31,45 +31,61 @@ A modern Discord music bot that plays music from your local collection with a be
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd SNOWLANDER
+   git clone https://github.com/joeeuston-dev/snowlander.git
+   cd snowlander
    ```
 
-2. **Install dependencies**
+2. **Create and activate virtual environment**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Configure environment**
+4. **Configure environment**
    ```bash
    cp config.example config.env
    # Edit config.env with your settings
    ```
 
-4. **Set environment variables**
+5. **Set environment variables**
    ```bash
    export DISCORD_TOKEN="your_bot_token_here"
    export MUSIC_DIRECTORY="/path/to/your/music"
    export DATABASE_PATH="./data/database/snowlander.db"
    ```
 
-5. **Run the application**
+6. **Create sample data for testing**
+   ```bash
+   python3 tools/sample_data.py
+   ```
+
+7. **Run the application**
    
    **Web server only:**
    ```bash
-   python -m uvicorn web.main:app --reload --host 0.0.0.0 --port 8000
+   python3 -m uvicorn web.main:app --reload --host 0.0.0.0 --port 8000
    ```
    
    **Discord bot only:**
    ```bash
-   python -m bot.discord_bot
+   python3 -m bot.discord_bot
    ```
    
    **Both (production-like):**
    ```bash
    # In separate terminals
-   python -m uvicorn web.main:app --host 0.0.0.0 --port 8000
-   python -m bot.discord_bot
+   python3 -m uvicorn web.main:app --host 0.0.0.0 --port 8000
+   python3 -m bot.discord_bot
+   ```
+
+8. **Access the web interface**
+   ```bash
+   open http://localhost:8000
    ```
 
 ## Docker Deployment

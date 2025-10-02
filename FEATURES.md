@@ -121,6 +121,14 @@
 
 ### Local Development
 ```bash
+# Clone and setup
+git clone https://github.com/joeeuston-dev/snowlander.git
+cd snowlander
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
 # Install dependencies
 pip install -r requirements.txt
 
@@ -129,10 +137,10 @@ export DISCORD_TOKEN="your_token"
 export MUSIC_DIRECTORY="/path/to/music"
 
 # Create sample data
-python tools/sample_data.py
+python3 tools/sample_data.py
 
 # Start web server
-python -m uvicorn web.main:app --reload
+python3 -m uvicorn web.main:app --reload
 
 # Access interface
 open http://localhost:8000

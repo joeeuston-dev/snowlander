@@ -55,6 +55,11 @@ env.bak/
 venv.bak/
 config.env
 
+# Virtual environment (common names)
+venv/
+virtualenv/
+.virtualenv/
+
 # IDEs
 .idea/
 .vscode/
