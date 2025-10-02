@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  snowlander:
+    build: .
+    container_name: snowlander-bot
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount your music directory (read-only)
+      - /path/to/your/music:/app/data/music:ro
+      # Mount database directory (persistent)
+      - ./data/database:/app/data/database
+    environment:
+      # Discord Configuration
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID:-}
+      
+      # Paths
+      - MUSIC_DIRECTORY=/app/data/music
+      - DATABASE_PATH=/app/data/database/snowlander.db
+      
+      # Web Server
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=false
+      
+      # Bot Settings
+      - BOT_PREFIX=!
+      - DEFAULT_VOLUME=0.5
+    
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M

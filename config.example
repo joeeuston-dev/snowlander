@@ -1,0 +1,16 @@
+# Discord Bot Configuration
+DISCORD_TOKEN=your_bot_token_here
+DISCORD_GUILD_ID=your_guild_id_here
+
+# Audio Configuration
+MUSIC_DIRECTORY=/app/data/music
+DATABASE_PATH=/app/data/database/snowlander.db
+
+# Web Server Configuration
+HOST=0.0.0.0
+PORT=8000
+DEBUG=False
+
+# Bot Configuration
+BOT_PREFIX=!
+DEFAULT_VOLUME=0.5

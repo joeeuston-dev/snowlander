@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SNOWLANDER{% endblock %}
+
+{% block content %}
+<div x-data="dashboard()" x-init="init()" class="px-4 py-6 sm:px-0">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-white">Dashboard</h1>
+        <p class="mt-2 text-gray-400">Monitor your SNOWLANDER music bot status and activity</p>
+    </div>
+
+    <!-- Status Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Bot Status -->
+        <div class="bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-robot text-2xl" :class="status.is_connected ? 'text-green-400' : 'text-red-400'"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-400 truncate">Bot Status</dt>
+                            <dd class="text-lg font-medium text-white" x-text="status.is_connected ? 'Connected' : 'Disconnected'"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Playback Status -->
+        <div class="bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-play text-2xl" :class="status.is_playing ? 'text-blue-400' : 'text-gray-400'"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-400 truncate">Playback</dt>
+                            <dd class="text-lg font-medium text-white" x-text="status.is_playing ? 'Playing' : 'Stopped'"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Queue Length -->
+        <div class="bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-list text-2xl text-purple-400"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-400 truncate">Queue</dt>
+                            <dd class="text-lg font-medium text-white" x-text="status.queue_length + ' tracks'"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volume -->
+        <div class="bg-gray-800 overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-volume-up text-2xl text-yellow-400"></i>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-400 truncate">Volume</dt>
+                            <dd class="text-lg font-medium text-white" x-text="Math.round(status.volume * 100) + '%'"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Track & Queue Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Now Playing -->
+        <div class="bg-gray-800 shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-700">
+                <h3 class="text-lg font-medium text-white flex items-center">
+                    <i class="fas fa-music mr-2"></i>
+                    Now Playing
+                </h3>
+            </div>
+            <div class="p-6">
+                <div x-show="status.current_track" x-cloak>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-music text-white text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-lg font-medium text-white truncate" x-text="status.current_track?.title || status.current_track?.filename || 'Unknown'"></p>
+                            <p class="text-sm text-gray-400 truncate" x-text="status.current_track?.artist || 'Unknown Artist'"></p>
+                            <p class="text-xs text-gray-500 truncate" x-text="status.current_track?.album || 'Unknown Album'"></p>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <span class="text-sm text-gray-400" x-text="formatDuration(status.current_track?.duration)"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-400 mb-1">
+                            <span x-text="formatDuration(status.position)"></span>
+                            <span x-text="formatDuration(status.current_track?.duration)"></span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                 :style="`width: ${status.current_track?.duration ? (status.position / status.current_track.duration) * 100 : 0}%`"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div x-show="!status.current_track" class="text-center py-8">
+                    <i class="fas fa-music text-4xl text-gray-600 mb-4"></i>
+                    <p class="text-gray-400">No track currently playing</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Queue -->
+        <div class="bg-gray-800 shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-white flex items-center">
+                        <i class="fas fa-list mr-2"></i>
+                        Queue
+                    </h3>
+                    <a href="/queue" class="text-blue-400 hover:text-blue-300 text-sm">View All</a>
+                </div>
+            </div>
+            <div class="p-6">
+                <div x-show="queue.length > 0" x-cloak>
+                    <div class="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
+                        <template x-for="(item, index) in queue.slice(0, 5)" :key="item.id">
+                            <div class="flex items-center space-x-3 p-2 hover:bg-gray-700 rounded">
+                                <div class="flex-shrink-0 w-6 text-center">
+                                    <span class="text-xs text-gray-400" x-text="item.position"></span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-white truncate" x-text="item.track.title || item.track.filename"></p>
+                                    <p class="text-xs text-gray-400 truncate" x-text="item.track.artist || 'Unknown Artist'"></p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <span class="text-xs text-gray-400" x-text="formatDuration(item.track.duration)"></span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <div x-show="queue.length > 5" class="mt-3 text-center">
+                        <span class="text-xs text-gray-400" x-text="`+${queue.length - 5} more tracks`"></span>
+                    </div>
+                </div>
+                
+                <div x-show="queue.length === 0" class="text-center py-8">
+                    <i class="fas fa-list text-4xl text-gray-600 mb-4"></i>
+                    <p class="text-gray-400">Queue is empty</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bot Connection Info -->
+    <div x-show="status.is_connected" x-cloak class="mt-8">
+        <div class="bg-gray-800 shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-700">
+                <h3 class="text-lg font-medium text-white flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Connection Details
+                </h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-400">Guild ID</dt>
+                        <dd class="mt-1 text-sm text-white" x-text="status.guild_id || 'Not available'"></dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-400">Channel ID</dt>
+                        <dd class="mt-1 text-sm text-white" x-text="status.channel_id || 'Not connected'"></dd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function dashboard() {
+        return {
+            status: {
+                is_connected: false,
+                is_playing: false,
+                current_track: null,
+                volume: 0.5,
+                position: 0.0,
+                queue_length: 0,
+                guild_id: null,
+                channel_id: null
+            },
+            queue: [],
+            
+            async init() {
+                await this.loadStatus();
+                await this.loadQueue();
+                
+                // Listen for WebSocket updates
+                document.addEventListener('bot-status-update', (event) => {
+                    this.status = { ...this.status, ...event.detail };
+                });
+                
+                document.addEventListener('queue-update', (event) => {
+                    this.loadQueue();
+                });
+                
+                // Update position every second for playing tracks
+                setInterval(() => {
+                    if (this.status.is_playing && this.status.current_track) {
+                        this.status.position += 1;
+                    }
+                }, 1000);
+            },
+            
+            async loadStatus() {
+                try {
+                    const response = await fetch('/api/status');
+                    if (response.ok) {
+                        this.status = await response.json();
+                    }
+                } catch (error) {
+                    console.error('Error loading status:', error);
+                }
+            },
+            
+            async loadQueue() {
+                try {
+                    const response = await fetch('/api/queue');
+                    if (response.ok) {
+                        this.queue = await response.json();
+                        this.status.queue_length = this.queue.length;
+                    }
+                } catch (error) {
+                    console.error('Error loading queue:', error);
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}
