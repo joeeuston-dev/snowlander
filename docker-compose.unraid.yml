@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  snowlander:
+    image: ghcr.io/joeeuston-dev/snowlander:latest
+    container_name: snowlander-bot
+    restart: unless-stopped
+    
+    ports:
+      - "8000:8000"
+    
+    volumes:
+      # Mount your music share (adjust path to your Unraid music share)
+      - /mnt/user/Music:/app/data/music:ro
+      # Persistent database storage
+      - /mnt/user/appdata/snowlander:/app/data/database
+      # Optional: logs directory
+      - /mnt/user/appdata/snowlander/logs:/app/logs
+    
+    environment:
+      # Discord Configuration
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID:-}
+      
+      # Paths (container paths)
+      - MUSIC_DIRECTORY=/app/data/music
+      - DATABASE_PATH=/app/data/database/snowlander.db
+      
+      # Web Server
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=false
+      
+      # Bot Settings
+      - BOT_PREFIX=!
+      - DEFAULT_VOLUME=0.5
+    
+    # Resource limits for Unraid
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

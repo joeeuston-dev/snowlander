@@ -90,33 +90,45 @@ A modern Discord music bot that plays music from your local collection with a be
 
 ## Docker Deployment
 
-1. **Build the image**
-   ```bash
-   docker build -t snowlander .
-   ```
+### **Quick Start with GitHub Container Registry**
+```bash
+# Use pre-built image from GitHub Container Registry
+docker run -d \
+  --name snowlander-bot \
+  -p 8000:8000 \
+  -v /path/to/your/music:/app/data/music:ro \
+  -v ./data/database:/app/data/database \
+  -e DISCORD_TOKEN=your_bot_token_here \
+  ghcr.io/joeeuston-dev/snowlander:latest
+```
 
-2. **Run with docker-compose (recommended)**
-   ```yaml
-   version: '3.8'
-   services:
-     snowlander:
-       build: .
-       ports:
-         - "8000:8000"
-       volumes:
-         - /path/to/your/music:/app/data/music:ro
-         - ./data/database:/app/data/database
-       environment:
-         - DISCORD_TOKEN=your_bot_token_here
-         - MUSIC_DIRECTORY=/app/data/music
-         - DATABASE_PATH=/app/data/database/snowlander.db
-       restart: unless-stopped
-   ```
+### **Docker Compose (Recommended)**
+```bash
+# Download the compose file
+wget https://raw.githubusercontent.com/joeeuston-dev/snowlander/main/docker-compose.yml
 
-3. **Run the container**
-   ```bash
-   docker-compose up -d
-   ```
+# Edit with your settings
+nano docker-compose.yml
+
+# Run
+docker-compose up -d
+```
+
+### **Unraid Deployment**
+For Unraid users, see the detailed [Unraid Deployment Guide](UNRAID_DEPLOYMENT.md) which covers:
+- GitHub Container Registry deployment
+- Community Applications installation
+- Manual Docker template setup
+- Troubleshooting and best practices
+
+### **Build from Source**
+```bash
+# Clone and build locally
+git clone https://github.com/joeeuston-dev/snowlander.git
+cd snowlander
+docker build -t snowlander .
+docker-compose up -d
+```
 
 ## Configuration
 
