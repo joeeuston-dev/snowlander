@@ -48,6 +48,18 @@ Every time you push to the main branch, GitHub Actions automatically builds and 
    http://your-unraid-ip:8000
    ```
 
+### **Verify GitHub Container Registry**
+
+You can check available images and versions:
+```bash
+# List available tags
+curl -s "https://ghcr.io/v2/joeeuston-dev/snowlander/tags/list" | jq
+
+# Pull specific versions
+docker pull ghcr.io/joeeuston-dev/snowlander:latest    # Default optimized
+docker pull ghcr.io/joeeuston-dev/snowlander:alpine    # Lightweight Alpine
+```
+
 ## 🐳 **Option 2: Unraid Community Applications**
 
 ### **Install via CA (Community Applications)**
