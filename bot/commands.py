@@ -6,8 +6,8 @@ from discord import VoiceChannel
 from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
-from ..web.database import db
-from ..web.models import Track, QueueItem
+from web.database import db
+from web.models import Track, QueueItem
 
 
 class MusicCommands(commands.Cog):

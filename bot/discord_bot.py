@@ -7,8 +7,8 @@ from discord.ext import commands
 from typing import Optional
 from datetime import datetime
 
-from ..web.database import db
-from ..web.models import BotStatus
+from web.database import db
+from web.models import BotStatus
 
 
 class SnowlanderBot(commands.Bot):
