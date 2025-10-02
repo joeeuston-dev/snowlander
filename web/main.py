@@ -2,6 +2,7 @@
 
 import os
 from typing import List, Optional
+from pathlib import Path
 from fastapi import FastAPI, HTTPException, Depends, Query, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -12,7 +13,7 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from .database import db
-from .models import Track, QueueItem, BotStatus, Playlist, TrackResponse, QueueItemResponse, BotStatusResponse, PlaylistResponse
+from .models import Track, QueueItem, BotStatus, Playlist, PlaylistItem, TrackResponse, QueueItemResponse, BotStatusResponse, PlaylistResponse
 from .websocket_manager import ConnectionManager
 
 # Initialize FastAPI app
@@ -22,9 +23,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Mount static files and templates
-app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
-templates = Jinja2Templates(directory="frontend/templates")
+# Get the project root directory
+PROJECT_ROOT = Path(__file__).parent.parent
+
+# Mount static files and templates using absolute paths
+static_dir = PROJECT_ROOT / "frontend" / "static"
+templates_dir = PROJECT_ROOT / "frontend" / "templates"
+
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+templates = Jinja2Templates(directory=str(templates_dir))
 
 # WebSocket connection manager
 manager = ConnectionManager()
