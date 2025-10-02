@@ -270,3 +270,7 @@ This project is open source. See LICENSE file for details.
 ## Support
 
 For issues and questions, please use the GitHub issues page.
+
+## Project Status
+
+🎵 SNOWLANDER is actively maintained and ready for production use!
