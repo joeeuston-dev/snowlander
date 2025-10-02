@@ -1,0 +1,38 @@
+# Ultra-minimal distroless build
+FROM python:3.11-slim AS builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libc6-dev \
+    libffi-dev \
+    libopus-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy and install Python dependencies
+COPY requirements.txt .
+RUN pip install --target=/app/packages --no-cache-dir -r requirements.txt
+
+# Production stage using distroless
+FROM gcr.io/distroless/python3-debian11
+
+# Copy Python packages and app
+COPY --from=builder /app/packages /app/packages
+COPY . /app
+
+# Set working directory
+WORKDIR /app
+
+# Set Python path
+ENV PYTHONPATH=/app/packages:/app
+ENV MUSIC_DIRECTORY=/app/data/music
+ENV DATABASE_PATH=/app/data/database/snowlander.db
+
+# Expose port
+EXPOSE 8000
+
+# Run the application
+CMD ["main.py"]

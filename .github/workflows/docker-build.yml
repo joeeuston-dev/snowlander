@@ -42,10 +42,22 @@ jobs:
           type=semver,pattern={{major}}.{{minor}}
           type=raw,value=latest,enable={{is_default_branch}}
 
-    - name: Build and push Docker image
+    - name: Build and push Docker image (default)
       uses: docker/build-push-action@v5
       with:
         context: .
+        file: ./Dockerfile
         push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Build and push Alpine variant
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.alpine
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:alpine
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:alpine-${{ github.sha }}
         labels: ${{ steps.meta.outputs.labels }}

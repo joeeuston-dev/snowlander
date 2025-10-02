@@ -1,32 +1,35 @@
-# Multi-stage build for optimized image size
-FROM python:3.11-slim AS builder
+# Multi-stage build for minimal Alpine-based image
+FROM python:3.11-alpine AS builder
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apk add --no-cache \
     gcc \
-    libc6-dev \
+    musl-dev \
     libffi-dev \
-    libopus-dev \
-    && rm -rf /var/lib/apt/lists/*
+    opus-dev \
+    python3-dev \
+    build-base
+
+# Set working directory
+WORKDIR /app
 
 # Copy and install Python dependencies
-COPY requirements.txt /tmp/
-RUN pip install --user --no-cache-dir -r /tmp/requirements.txt
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
 
 # Production stage
-FROM python:3.11-slim
+FROM python:3.11-alpine
 
-# Install only runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install runtime dependencies only
+RUN apk add --no-cache \
     ffmpeg \
-    libopus0 \
+    opus \
     curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get autoremove -y \
-    && apt-get clean
+    && rm -rf /var/cache/apk/*
 
 # Create non-root user for security
-RUN groupadd -r snowlander && useradd -r -g snowlander snowlander
+RUN addgroup -g 1001 -S snowlander && \
+    adduser -S snowlander -u 1001 -G snowlander
 
 # Set working directory
 WORKDIR /app
@@ -37,7 +40,7 @@ COPY --from=builder /root/.local /home/snowlander/.local
 # Copy application code
 COPY --chown=snowlander:snowlander . .
 
-# Create data directories with proper permissions
+# Create data directories
 RUN mkdir -p data/music data/database && \
     chown -R snowlander:snowlander data/
 
@@ -54,8 +57,8 @@ ENV DATABASE_PATH=/app/data/database/snowlander.db
 EXPOSE 8000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/status || exit 1
 
-# Use exec form and single entrypoint for proper signal handling
+# Use exec form for proper signal handling
 CMD ["python3", "main.py"]
